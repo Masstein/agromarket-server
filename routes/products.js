@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
+const adminOnly = [requireAuth, requireRole('admin')]; // цепочка из двух middleware
 
-// Возвращает текст ошибки или null, если всё в порядке
 function validateProduct(body) {
   const { name, price } = body;
   if (!name || !String(name).trim()) return 'Поле name обязательно';
@@ -37,7 +38,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/products
-router.post('/', async (req, res) => {
+router.post('/', adminOnly, async (req, res) => {
   const body = req.body || {};
   const error = validateProduct(body);
   if (error) return res.status(400).json({ error });
@@ -53,7 +54,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/products/5
-router.put('/:id', async (req, res) => {
+router.put('/:id', adminOnly, async (req, res) => {
   const body = req.body || {};
   const error = validateProduct(body);
   if (error) return res.status(400).json({ error });
@@ -73,7 +74,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/products/5
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', adminOnly, async (req, res) => {
   const { rowCount } = await pool.query(
     'DELETE FROM products WHERE id = $1',
     [req.params.id]

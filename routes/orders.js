@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
+import { requireAuth, requireRole } from '../middleware/auth.js';
 
 const router = Router();
+const adminOnly = [requireAuth, requireRole('admin')];
 
-// GET /api/orders: заявки вместе с названием товара
-router.get('/', async (req, res) => {
+// GET /api/orders: только admin
+router.get('/', adminOnly, async (req, res) => {
   const { rows } = await pool.query(`
     SELECT o.*, p.name AS product_name
     FROM orders o
@@ -14,7 +16,7 @@ router.get('/', async (req, res) => {
   res.json(rows);
 });
 
-// POST /api/orders: новая заявка (форма из React)
+// POST /api/orders: открыт для всех
 router.post('/', async (req, res) => {
   const { product_id, name, email, phone, quantity, date, comment } =
     req.body || {};
@@ -38,10 +40,9 @@ router.post('/', async (req, res) => {
   res.status(201).json(rows[0]);
 });
 
-// PATCH /api/orders/3  тело: { "status": "processing" }
-router.patch('/:id', async (req, res) => {
+// PATCH /api/orders/3: только admin
+router.patch('/:id', adminOnly, async (req, res) => {
   const { status } = req.body || {};
-
   if (!status) {
     return res.status(400).json({ error: 'Поле status обязательно' });
   }
