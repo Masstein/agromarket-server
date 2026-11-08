@@ -1,3 +1,16 @@
+![CI](https://github.com/ЛОГИН/agromarket-server/actions/workflows/ci.yml/badge.svg)
+
+## Тестирование
+1. Создать базу `agromarket_test` (pgAdmin)
+2. Скопировать `.env` в `.env.test` и указать в нём тестовую базу
+3. `npm test` — все тесты, `npm run test:watch` — режим наблюдения,
+   `npm run coverage` — отчёт о покрытии (сейчас: Lines ...%)
+
+## Правила работы с Git
+- Ветка `main` защищена: изменения только через Pull Request
+- PR сливается после зелёного CI и одобрения ревьюера
+- Ветки: `feature/...`, `fix/...`; коммиты: feat, fix, test, refactor, docs, ci, chore
+
 ## Переменные окружения (.env)
 JWT_SECRET      — случайная строка 64 символа
 JWT_EXPIRES_IN  — срок жизни токена, например 2h
