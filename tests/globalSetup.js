@@ -10,4 +10,5 @@ export default function setup() {
 
   // Пересоздаём таблицы и заполняем тестовую базу
   execSync('npm run db:init', { stdio: 'inherit' });
+  execSync('npm run db:migrate', { stdio: 'inherit' });
 }
