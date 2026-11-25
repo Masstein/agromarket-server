@@ -3,13 +3,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-  "dev": "node --watch server.js",
-  "start": "node server.js",
-  "db:init": "node db/seed.js",
-  "test": "vitest run",
-  "test:watch": "vitest",
-  "coverage": "vitest run --coverage"
-},
+    "dev": "node --watch server.js",
+    "start": "node server.js",
+    "db:init": "node db/seed.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "db:migrate": "node db/migrate.js",
+    "smoke": "node scripts/smoke.js"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -24,5 +26,8 @@
     "@vitest/coverage-v8": "^5.1.0",
     "supertest": "^7.3.2",
     "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=22.12"
   }
 }
