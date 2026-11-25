@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+<<<<<<< HEAD
     "dev": "node --watch server.js",
     "start": "node server.js",
     "db:init": "node db/seed.js",
@@ -15,6 +16,19 @@
   "engines": {
     "node": ">=22"
   },
+=======
+  "dev": "node --watch server.js",
+  "db:migrate": "node db/migrate.js",
+  "start": "node server.js",
+  "db:init": "node db/seed.js",
+  "test": "vitest run",
+  "test:watch": "vitest",
+  "coverage": "vitest run --coverage"
+},
+"engines": {
+    "node": ">=22"
+},
+>>>>>>> origin/main
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
