@@ -1,49 +1,18 @@
-# АгроМаркет — лабораторная работа №9
-
-## Локальный запуск
-
-Требуются Node.js 22.12+ и PostgreSQL. Скопируйте `.env.example` в `.env`, задайте локальную `DATABASE_URL` и секреты. Для тестов скопируйте `.env.test.example` в `.env.test` и укажите отдельную локальную базу `agromarket_test`. Файлы `.env*` не коммитятся.
-
-```bash
-npm ci
-npm run db:init       # только локальная/тестовая база; пересоздаёт таблицы
-npm run db:migrate    # безопасно создаёт отсутствующие таблицы; данные не удаляет
-cp .env.test.example .env.test  # Windows PowerShell: Copy-Item .env.test.example .env.test
-npm test
-npm run dev
-```
-
-`db:init` намеренно отказывается работать с не-локальной базой без `--force`. Флаг `--force` применяйте только один раз к заведомо пустой облачной базе. Никогда не запускайте его на базе с реальными данными. Для production Render использует `npm run db:migrate && npm start`.
-
 ## Продакшен
 
-- Сайт: `https://agromarket-YOUR-GITHUB-LOGIN.vercel.app`
-- API: `https://agromarket-api-YOUR-GITHUB-LOGIN.onrender.com/api/health`
+- Сайт: https://agromarket-react-eta.vercel.app (укажите точный адрес вашего проекта на Vercel)
+- API: https://agromarket-api-masstein.onrender.com/api/health
 - Схема: React (Vercel) → Express (Render, Frankfurt) → PostgreSQL (Neon, Frankfurt)
 
-Замените `YOUR-GITHUB-LOGIN` на свой GitHub-логин после настройки сервисов.
+### Переменные окружения (значения — только в панелях сервисов)
 
-### Переменные окружения
-
-| Переменная | Где задаётся | Секрет? |
+| Переменная | Где задана | Секрет |
 |---|---|---|
-| `DATABASE_URL` | Render | Да |
-| `JWT_SECRET` | Render | Да, минимум 32 символа |
-| `CORS_ORIGIN` | Render | Нет; Vercel origin и `http://localhost:5173`, через запятую |
-| `VITE_API_URL` | Vercel | Нет; адрес API, встраивается при сборке |
-| `RENDER_DEPLOY_HOOK_URL` | GitHub Actions Secrets | Да |
-| `API_URL` | GitHub Actions Variables | Нет; например `https://agromarket-api-LOGIN.onrender.com/api` |
-| `FRONTEND_URL` | GitHub Actions Variables | Нет; например `https://agromarket-LOGIN.vercel.app` |
-
-### Деплой
-
-1. Создайте PostgreSQL-проект в Neon (регион Frankfurt) и скопируйте полную строку подключения с `sslmode=require`. Не публикуйте её.
-2. Один раз заполните пустую Neon-базу из локального терминала: создайте личный `.env.neon` с `DATABASE_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, затем выполните `node --env-file=.env.neon db/seed.js --force` и `node --env-file=.env.neon db/migrate.js`. `.env.neon` не коммитить.
-3. Создайте Render Web Service из `agromarket-server`, регион Frankfurt, Build Command `npm ci --omit=dev`, Start Command `npm run db:migrate && npm start`, Health Check Path `/api/health`, Auto-Deploy Off. Добавьте `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET` (случайный, не короче 32 символов), `JWT_EXPIRES_IN=2h`, `CORS_ORIGIN`. `PORT` задаёт Render.
-4. Создайте Vercel Project из `agromarket-react`: Build Command `npm run build`, Output Directory `dist`, переменная `VITE_API_URL=https://agromarket-api-LOGIN.onrender.com/api`.
-5. После первого деплоя добавьте в Render `CORS_ORIGIN=https://agromarket-LOGIN.vercel.app,http://localhost:5173` без слэша в конце.
-6. В GitHub → Settings → Secrets and variables → Actions добавьте secret `RENDER_DEPLOY_HOOK_URL` и variables `API_URL`, `FRONTEND_URL`. У Render отключите Auto-Deploy, чтобы деплоем управлял GitHub Actions.
-7. Настройте защиту `main`: PR обязателен, требуется успешная проверка `test` (и для фронтенда `build` в его репозитории). Для production deploy выполняется только после тестов на push в `main`; smoke ждёт именно SHA проверенного коммита.
+| DATABASE_URL | Render | да |
+| JWT_SECRET | Render | да |
+| CORS_ORIGIN | Render | нет |
+| VITE_API_URL | Vercel | нет |
+| RENDER_DEPLOY_HOOK_URL | GitHub Secrets | да |
 
 ## Smoke-тест
 
