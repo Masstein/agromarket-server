@@ -1,3 +1,4 @@
+ lab9-backend
 node_modules/
 coverage/
 dist/
@@ -6,3 +7,9 @@ dist/
 !.env.test.example
 !.env.smoke.example
 .DS_Store
+node_modules
+.env
+.env*
+!.env.example
+coverage/
+ main
