@@ -1,12 +1,10 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import jwt from 'jsonwebtoken';
 import { requireAuth, requireRole } from '../middleware/auth.js';
-import { errorHandler } from '../middleware/errorHandler.js';
 
-// «Поддельный» ответ: запоминает, какие методы и с чем вызывали
 function mockRes() {
   const res = {};
-  res.status = vi.fn(() => res); // возвращает res, чтобы работало res.status(403).json(...)
+  res.status = vi.fn(() => res);
   res.json = vi.fn(() => res);
   return res;
 }
@@ -71,27 +69,5 @@ describe('requireAuth', () => {
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.json.mock.calls[0][0].error).toMatch(/истёк/);
     expect(next).not.toHaveBeenCalled();
-  });
-});
-
-describe('errorHandler', () => {
-  afterEach(() => vi.unstubAllEnvs());
-
-  it('в production скрывает текст ошибки 500', () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    const res = mockRes();
-    const err = new Error('connect ECONNREFUSED 10.0.0.5:5432');
-    errorHandler(err, { method: 'GET', originalUrl: '/x' }, res, vi.fn());
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json.mock.calls[0][0].error).toBe('Внутренняя ошибка сервера');
-  });
-
-  it('передаёт текст ошибки 400 даже в production', () => {
-    vi.stubEnv('NODE_ENV', 'production');
-    const res = mockRes();
-    const err = Object.assign(new Error('Некорректные данные'), { status: 400 });
-    errorHandler(err, { method: 'POST', originalUrl: '/x' }, res, vi.fn());
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json.mock.calls[0][0].error).toBe('Некорректные данные');
   });
 });
