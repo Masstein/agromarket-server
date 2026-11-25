@@ -1,15 +1,16 @@
-name: CI
+name: CI and deploy
 
 on:
   push:
-    branches: [main]   # каждый push в main
-  pull_request:        # и каждый Pull Request
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    # Рядом с тестами GitHub запустит чистый PostgreSQL в контейнере
     services:
       postgres:
         image: postgres:16
@@ -24,8 +25,6 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
-
-    # Переменные окружения вместо .env.test (значения только для CI)
     env:
       NODE_ENV: test
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/agromarket_test
@@ -34,7 +33,6 @@ jobs:
       ADMIN_EMAIL: admin@test.kz
       ADMIN_PASSWORD: Admin12345
       CORS_ORIGIN: http://localhost:5173
-
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,3 +41,27 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    concurrency: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Trigger Render deploy for the tested commit
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          test -n "$RENDER_DEPLOY_HOOK_URL" || { echo 'Missing RENDER_DEPLOY_HOOK_URL secret'; exit 1; }
+          curl -fsS -X POST "${RENDER_DEPLOY_HOOK_URL}&ref=${GITHUB_SHA}"
+      - name: Smoke test production
+        run: node scripts/smoke.js
+        env:
+          API_URL: ${{ vars.API_URL }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          EXPECTED_VERSION: ${{ github.sha }}
